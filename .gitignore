@@ -1,0 +1,9 @@
+# Configuração com credenciais reais do banco (use config.php.example como base)
+config.php
+
+# Backups gerados durante manutenção
+backup_*/
+
+# Arquivos de sistema / editores
+*.log
+.DS_Store

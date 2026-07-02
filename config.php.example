@@ -1,0 +1,31 @@
+<?php
+// Copie este arquivo para config.php e preencha as credenciais reais do banco.
+//   cp config.php.example config.php
+
+// PHP 8.1+ lança exceções no mysqli por padrão. Deixamos o modo de exceção
+// ativo (comportamento padrão) e tratamos as falhas com try/catch nos arquivos
+// que acessam o banco, para que erros de conexão/consulta não virem HTTP 500.
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+define('DB_HOST', '10.0.0.5');
+define('DB_USER', 'pesquisa_user');
+define('DB_PASS', 'ALTERE_ESTA_SENHA');
+define('DB_NAME', 'CMMJ_TI');
+
+define('COMPANY_LOGO', '/assets/logo.png');
+
+/**
+ * Retorna uma conexão mysqli com o banco. Usado por export.php.
+ */
+function db(): mysqli
+{
+    return new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+}
+
+/**
+ * Escapa um valor para saída segura em HTML.
+ */
+function e($value): string
+{
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}

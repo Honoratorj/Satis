@@ -1,0 +1,4 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Pesquisa Enviada com Sucesso</title><style>body{font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;background-color:#f4f4f4;margin:0;text-align:center}.container{background-color:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.1)}h2{color:#F38828;margin-bottom:10px}.emoji{font-size:60px}.message{margin-top:10px;font-size:20px;color:#555}.footer{margin-top:20px;font-size:14px;color:#777}</style></head>
+<body><div class="container"><div class="emoji">✅</div><h2>Pesquisa enviada com sucesso!</h2><div class="message">Obrigado pela sua avaliação.</div><div class="footer">&copy; 2026 Consórcio Monto Mendes Júnior. Todos os direitos reservados.</div></div></body></html>
