@@ -5,6 +5,20 @@ function h($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+// Formata uma data para exibição no padrão brasileiro DD/MM/AA (com HH:MM
+// quando houver horário). Mantém o valor original se não conseguir interpretar.
+function formatDataBR($value) {
+    $value = trim((string)$value);
+    if ($value === '') {
+        return '';
+    }
+    $ts = strtotime($value);
+    if ($ts === false) {
+        return $value;
+    }
+    return date(strpos($value, ':') !== false ? 'd/m/y H:i' : 'd/m/y', $ts);
+}
+
 $ticket_id = $_GET['ticket_id'] ?? '';
 $ticket_name = $_GET['ticket_name'] ?? '';
 $ticket_createdate = $_GET['ticket_createdate'] ?? '';
@@ -505,11 +519,11 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
                         </div>
                         <div class="item">
                             <span>Abertura</span>
-                            <strong><?= h($ticket_createdate) ?></strong>
+                            <strong><?= h(formatDataBR($ticket_createdate)) ?></strong>
                         </div>
                         <div class="item">
                             <span>Solução</span>
-                            <strong><?= h($ticket_solvedate) ?></strong>
+                            <strong><?= h(formatDataBR($ticket_solvedate)) ?></strong>
                         </div>
                     </div>
                 </div>
