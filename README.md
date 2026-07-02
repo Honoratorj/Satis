@@ -37,8 +37,8 @@ servidor web (ex.: `pesquisa_user@10.0.0.7`).
 | Arquivo | Função |
 |---|---|
 | `index.php` | Formulário da pesquisa. Recebe `ticket_id`, `ticket_name`, `ticket_createdate`, `ticket_solvedate` via query string e busca técnico/requerente no GLPI. |
-| `salvar_pesquisa.php` | Recebe o POST do formulário, valida e grava em `pesquisa_satisfacao`. Redireciona para `sucesso.php`. |
-| `sucesso.php` | Página de confirmação de envio. |
+| `salvar_pesquisa.php` | Recebe o POST do formulário, valida e grava em `pesquisa_satisfacao`. Redireciona para `sucesso.php`. Se o chamado já foi avaliado, exibe uma página amigável (ver _Resposta única_). |
+| `sucesso.php` | Página de confirmação de envio (com animação e confete). |
 | `export.php` | Relatório/consulta das pesquisas com filtros (técnico, requerente, período, nota, etc.). |
 | `identificar_tecnico.php` | Script de manutenção: preenche o técnico dos registros com `tecnico IS NULL`, consultando o GLPI. |
 | `identificar_tecnico.sh` | Wrapper para rodar o script acima via cron/CLI. |
@@ -55,6 +55,32 @@ servidor web (ex.: `pesquisa_user@10.0.0.7`).
 2. `index.php` renderiza o formulário já preenchido com técnico/requerente.
 3. O usuário avalia e envia; `salvar_pesquisa.php` grava a resposta.
 4. As respostas podem ser consultadas em `export.php`.
+
+## Resposta única
+
+A coluna `ticket_id` da tabela `pesquisa_satisfacao` tem um índice **UNIQUE**,
+portanto **cada chamado só pode ser avaliado uma vez**. Se o usuário reenviar a
+pesquisa de um chamado já respondido, o `INSERT` falha com o erro MySQL `1062`
+(_Duplicate entry_).
+
+`salvar_pesquisa.php` trata esse caso especificamente: em vez da mensagem
+genérica de erro, exibe uma página amigável **"Este chamado já foi avaliado"**
+(HTTP `409`). Qualquer outra falha de banco continua caindo na mensagem de erro
+padrão, e o detalhe técnico é sempre registrado via `error_log`.
+
+## Interface / animações
+
+`index.php` e `sucesso.php` usam CSS + JavaScript (sem dependências externas)
+para uma experiência mais dinâmica:
+
+- Fundo animado com rede de partículas (canvas) e _aurora_ de gradientes.
+- Revelação escalonada dos blocos e leve _tilt_ 3D no card ao mover o mouse.
+- Avatar do técnico com anel giratório; barra de progresso do preenchimento.
+- Emojis de avaliação reativos, com banner de feedback dinâmico por nota.
+- Confete ao dar nota alta e na página de sucesso; botão com brilho e _ripple_.
+
+Todas as animações respeitam `prefers-reduced-motion` (usuários com essa
+preferência veem a versão estática).
 
 ## Banco de dados
 

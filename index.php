@@ -135,17 +135,69 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
         body {
             margin: 0;
             font-family: Arial, Helvetica, sans-serif;
-            background:
-                radial-gradient(circle at top, #ffffff 0%, #f7f8fa 30%, var(--bg) 100%);
+            background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             padding: 16px;
+            overflow-x: hidden;
+        }
+
+        /* ---------- Fundo animado ---------- */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            display: block;
+        }
+
+        .aurora {
+            position: fixed;
+            inset: -20vmax;
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(60px);
+            opacity: 0.55;
+        }
+
+        .aurora span {
+            position: absolute;
+            display: block;
+            width: 46vmax;
+            height: 46vmax;
+            border-radius: 50%;
+            mix-blend-mode: multiply;
+            animation: drift 22s ease-in-out infinite;
+        }
+
+        .aurora .b1 { background: radial-gradient(circle, #ffd3c2 0%, transparent 65%); top: -10vmax; left: -6vmax; }
+        .aurora .b2 { background: radial-gradient(circle, #ffe1b3 0%, transparent 65%); top: 10vmax; right: -12vmax; animation-delay: -7s; animation-duration: 27s; }
+        .aurora .b3 { background: radial-gradient(circle, #ffc7bb 0%, transparent 65%); bottom: -14vmax; left: 20vmax; animation-delay: -13s; animation-duration: 31s; }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%      { transform: translate(8vmax, 6vmax) scale(1.12); }
+            66%      { transform: translate(-6vmax, 4vmax) scale(0.94); }
         }
 
         .page {
             width: 100%;
             max-width: 760px;
             margin: 0 auto;
+            position: relative;
+        }
+
+        /* ---------- Revelação escalonada ---------- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(26px) scale(0.98);
+            animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation-delay: calc(var(--i, 0) * 90ms + 120ms);
+        }
+
+        @keyframes rise {
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .card {
@@ -154,6 +206,28 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             overflow: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            will-change: transform;
+        }
+
+        /* Barra de progresso fixa no topo do card */
+        .progress {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            height: 5px;
+            background: rgba(173, 26, 5, 0.08);
+            overflow: hidden;
+        }
+
+        .progress .bar {
+            height: 100%;
+            width: 0;
+            border-radius: 0 4px 4px 0;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            box-shadow: 0 0 12px rgba(249, 130, 36, 0.6);
+            transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .hero {
@@ -230,6 +304,30 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
             font-weight: 700;
             overflow: hidden;
             border: 1px solid rgba(173, 26, 5, 0.1);
+            position: relative;
+            animation: float 5s ease-in-out infinite;
+        }
+
+        /* Anel giratório ao redor do avatar */
+        .avatar::before {
+            content: "";
+            position: absolute;
+            inset: -5px;
+            border-radius: 50%;
+            padding: 3px;
+            background: conic-gradient(from 0deg, var(--primary), var(--accent), #ffd27a, var(--primary));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            animation: spin 6s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-6px); }
         }
 
         .avatar img {
@@ -325,13 +423,23 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
             background: #fff;
             cursor: pointer;
             font-weight: 700;
-            transition: 0.2s ease;
+            transition: transform 0.18s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
+
+        .choice label:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(16, 24, 40, 0.08); }
+        .choice label:active { transform: scale(0.97); }
 
         .choice input:checked + label {
             background: var(--primary-soft);
             border-color: rgba(173, 26, 5, 0.35);
             color: var(--primary);
+            animation: pop 0.4s cubic-bezier(0.22, 1.4, 0.4, 1);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.06); }
+            100% { transform: scale(1); }
         }
 
         .rating-buttons {
@@ -361,14 +469,55 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
             border-radius: 16px;
             background: #fff;
             cursor: pointer;
-            transition: 0.2s ease;
+            transition: transform 0.2s cubic-bezier(0.22, 1.4, 0.4, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             user-select: none;
         }
+
+        .rating label:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 22px rgba(16, 24, 40, 0.1);
+        }
+
+        .rating label:hover .emoji { transform: scale(1.25) rotate(-6deg); }
 
         .rating .emoji {
             font-size: clamp(1.5rem, 6vw, 2rem);
             line-height: 1;
+            transition: transform 0.25s cubic-bezier(0.22, 1.4, 0.4, 1);
         }
+
+        .rating input:checked + label .emoji {
+            animation: bounce 0.6s cubic-bezier(0.22, 1.4, 0.4, 1);
+        }
+
+        @keyframes bounce {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.4) rotate(8deg); }
+            60% { transform: scale(0.9) rotate(-4deg); }
+            100% { transform: scale(1.15); }
+        }
+
+        /* Dim nos emojis não selecionados quando há uma escolha */
+        .rating-buttons.has-choice .rating input:not(:checked) + label { opacity: 0.5; }
+        .rating-buttons.has-choice .rating input:not(:checked) + label:hover { opacity: 1; }
+
+        /* Banner de feedback dinâmico */
+        .mood {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+            min-height: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .mood.show { opacity: 1; transform: translateY(0); }
+        .mood .mood-emoji { font-size: 1.4rem; }
 
         .rating .note {
             font-size: 0.9rem;
@@ -416,16 +565,94 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
         }
 
         .submit {
+            position: relative;
             width: 100%;
             min-height: 54px;
             border: 0;
             border-radius: 16px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
+            background-size: 220% 100%;
             color: #fff;
             font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
+            overflow: hidden;
             box-shadow: 0 10px 24px rgba(173, 26, 5, 0.18);
+            transition: transform 0.18s ease, box-shadow 0.25s ease, background-position 0.6s ease;
+            /* Fade-in de entrada (só opacidade, sem travar o transform do hover)
+               + brilho contínuo. */
+            opacity: 0;
+            animation: fade-in-btn 0.6s ease 0.8s forwards, shine 6s linear infinite;
+        }
+
+        @keyframes fade-in-btn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shine {
+            0% { background-position: 0% 0; }
+            100% { background-position: 220% 0; }
+        }
+
+        .submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 32px rgba(173, 26, 5, 0.28);
+        }
+
+        .submit:active { transform: translateY(-1px) scale(0.99); }
+
+        .submit .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            transform: translate(-50%, -50%) scale(0);
+            animation: ripple 0.6s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to { transform: translate(-50%, -50%) scale(24); opacity: 0; }
+        }
+
+        .submit.loading { pointer-events: none; }
+        .submit.loading .label { visibility: hidden; }
+
+        .submit .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 22px;
+            height: 22px;
+            margin: -11px 0 0 -11px;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            display: none;
+            animation: spin 0.7s linear infinite;
+        }
+
+        .submit.loading .spinner { display: block; }
+
+        /* ---------- Confete ---------- */
+        #confetti {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Respeita quem prefere menos movimento */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+            .reveal { opacity: 1; transform: none; }
+            .submit { opacity: 1; }
         }
 
         .footer {
@@ -476,9 +703,18 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
     </style>
 </head>
 <body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="aurora" aria-hidden="true">
+        <span class="b1"></span>
+        <span class="b2"></span>
+        <span class="b3"></span>
+    </div>
+    <canvas id="confetti" aria-hidden="true"></canvas>
+
     <div class="page">
-        <div class="card">
-            <div class="hero">
+        <div class="card" id="card">
+            <div class="progress" aria-hidden="true"><div class="bar" id="progress-bar"></div></div>
+            <div class="hero reveal" style="--i:0">
                 <div class="logo-wrap">
                     <img src="<?= h(COMPANY_LOGO) ?>" alt="Logo da empresa">
                 </div>
@@ -487,7 +723,7 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
             </div>
 
             <div class="content">
-                <div class="tech-box">
+                <div class="tech-box reveal" style="--i:1">
                     <div class="avatar">
                         <?php if ($foto_url): ?>
                             <img src="<?= h($foto_url) ?>" alt="Foto do técnico">
@@ -503,7 +739,7 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
                     </div>
                 </div>
 
-                <div class="ticket-box">
+                <div class="ticket-box reveal" style="--i:2">
                     <div class="ticket-grid">
                         <div class="item">
                             <span>Chamado</span>
@@ -537,7 +773,7 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
                     <input type="hidden" name="cargo" value="<?= h($cargo) ?>">
                     <input type="hidden" name="requerente" value="<?= h($requerente) ?>">
 
-                    <div class="question">
+                    <div class="question reveal" style="--i:3">
                         <h3>Seu chamado foi solucionado?</h3>
                         <div class="radios">
                             <div class="choice">
@@ -551,7 +787,7 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
                         </div>
                     </div>
 
-                    <div class="question">
+                    <div class="question reveal" style="--i:4">
                         <h3>A solução apresentada foi satisfatória?</h3>
                         <div class="radios">
                             <div class="choice">
@@ -565,9 +801,9 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
                         </div>
                     </div>
 
-                    <div class="question">
+                    <div class="question reveal" style="--i:5">
                         <h3>Como você avalia este atendimento?</h3>
-                        <div class="rating-buttons">
+                        <div class="rating-buttons" id="rating-buttons">
                             <div class="rating">
                                 <input type="radio" id="rate1" name="avaliacao" value="1" required>
                                 <label for="rate1"><span class="emoji">😠</span><span class="note">1</span></label>
@@ -589,22 +825,255 @@ $inicial = $tecnico !== '' ? mb_strtoupper(mb_substr($tecnico, 0, 1, 'UTF-8'), '
                                 <label for="rate5"><span class="emoji">😁</span><span class="note">5</span></label>
                             </div>
                         </div>
+                        <div class="mood" id="mood" aria-live="polite">
+                            <span class="mood-emoji"></span><span class="mood-text"></span>
+                        </div>
                     </div>
 
-                    <div class="comment-box">
+                    <div class="comment-box reveal" style="--i:6">
                         <h3>Crítica, elogio ou sugestão</h3>
                         <textarea name="comentario" placeholder="Escreva aqui sua opinião sobre o atendimento."></textarea>
                         <div class="hint">Campo opcional.</div>
                     </div>
 
-                    <button class="submit" type="submit">Enviar avaliação</button>
+                    <button class="submit" type="submit" id="submit-btn">
+                        <span class="label">Enviar avaliação</span>
+                        <span class="spinner" aria-hidden="true"></span>
+                    </button>
                 </form>
 
-                <div class="footer">
+                <div class="footer reveal" style="--i:8">
                     &copy; 2026 Consórcio Monto Mendes Júnior. Todos os direitos reservados.
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+    (function () {
+        "use strict";
+        var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        /* ---------- Fundo: rede de partículas ---------- */
+        (function particleBackground() {
+            var canvas = document.getElementById("bg-canvas");
+            if (!canvas || reduceMotion) { if (canvas) canvas.style.display = "none"; return; }
+            var ctx = canvas.getContext("2d");
+            var w, h, dpr, points = [];
+
+            function resize() {
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                w = canvas.width = Math.floor(window.innerWidth * dpr);
+                h = canvas.height = Math.floor(window.innerHeight * dpr);
+                canvas.style.width = window.innerWidth + "px";
+                canvas.style.height = window.innerHeight + "px";
+                var target = Math.round((window.innerWidth * window.innerHeight) / 26000);
+                target = Math.max(28, Math.min(90, target));
+                points = [];
+                for (var i = 0; i < target; i++) {
+                    points.push({
+                        x: Math.random() * w,
+                        y: Math.random() * h,
+                        vx: (Math.random() - 0.5) * 0.28 * dpr,
+                        vy: (Math.random() - 0.5) * 0.28 * dpr,
+                        r: (Math.random() * 1.6 + 0.8) * dpr
+                    });
+                }
+            }
+
+            var mouse = { x: -9999, y: -9999 };
+            window.addEventListener("mousemove", function (e) { mouse.x = e.clientX * dpr; mouse.y = e.clientY * dpr; });
+            window.addEventListener("mouseout", function () { mouse.x = mouse.y = -9999; });
+
+            function tick() {
+                ctx.clearRect(0, 0, w, h);
+                var linkDist = 130 * dpr;
+                for (var i = 0; i < points.length; i++) {
+                    var p = points[i];
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.x < 0 || p.x > w) p.vx *= -1;
+                    if (p.y < 0 || p.y > h) p.vy *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = "rgba(173, 26, 5, 0.35)";
+                    ctx.fill();
+
+                    for (var j = i + 1; j < points.length; j++) {
+                        var q = points[j];
+                        var dx = p.x - q.x, dy = p.y - q.y;
+                        var dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < linkDist) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(q.x, q.y);
+                            ctx.strokeStyle = "rgba(249, 130, 36," + (0.16 * (1 - dist / linkDist)) + ")";
+                            ctx.lineWidth = dpr;
+                            ctx.stroke();
+                        }
+                    }
+
+                    var mdx = p.x - mouse.x, mdy = p.y - mouse.y;
+                    var mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+                    if (mdist < linkDist * 1.6) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.strokeStyle = "rgba(173, 26, 5," + (0.22 * (1 - mdist / (linkDist * 1.6))) + ")";
+                        ctx.lineWidth = dpr;
+                        ctx.stroke();
+                    }
+                }
+                requestAnimationFrame(tick);
+            }
+            resize();
+            window.addEventListener("resize", resize);
+            requestAnimationFrame(tick);
+        })();
+
+        /* ---------- Tilt 3D no card ---------- */
+        (function tilt() {
+            var card = document.getElementById("card");
+            if (!card || reduceMotion || window.matchMedia("(pointer: coarse)").matches) return;
+            var raf = null;
+            card.addEventListener("mousemove", function (e) {
+                var rect = card.getBoundingClientRect();
+                var px = (e.clientX - rect.left) / rect.width - 0.5;
+                var py = (e.clientY - rect.top) / rect.height - 0.5;
+                if (raf) cancelAnimationFrame(raf);
+                raf = requestAnimationFrame(function () {
+                    card.style.transform = "perspective(1200px) rotateX(" + (-py * 3) + "deg) rotateY(" + (px * 3) + "deg)";
+                });
+            });
+            card.addEventListener("mouseleave", function () {
+                if (raf) cancelAnimationFrame(raf);
+                card.style.transform = "perspective(1200px) rotateX(0) rotateY(0)";
+            });
+        })();
+
+        /* ---------- Barra de progresso ---------- */
+        (function progress() {
+            var bar = document.getElementById("progress-bar");
+            var form = document.querySelector("form");
+            if (!bar || !form) return;
+            var groups = ["solucao_chamado", "satisfacao", "avaliacao"];
+            function update() {
+                var done = 0;
+                groups.forEach(function (name) {
+                    if (form.querySelector('input[name="' + name + '"]:checked')) done++;
+                });
+                bar.style.width = (done / groups.length * 100) + "%";
+            }
+            form.addEventListener("change", update);
+            update();
+        })();
+
+        /* ---------- Feedback de humor na avaliação ---------- */
+        (function mood() {
+            var box = document.getElementById("rating-buttons");
+            var mood = document.getElementById("mood");
+            if (!box || !mood) return;
+            var emojiEl = mood.querySelector(".mood-emoji");
+            var textEl = mood.querySelector(".mood-text");
+            var map = {
+                "1": { e: "😠", t: "Sentimos muito. Vamos melhorar." },
+                "2": { e: "😟", t: "Obrigado — vamos rever isso." },
+                "3": { e: "😐", t: "Anotado! Buscamos evoluir." },
+                "4": { e: "😀", t: "Que bom! Ficamos felizes." },
+                "5": { e: "😁", t: "Sensacional! Muito obrigado!" }
+            };
+            box.addEventListener("change", function (e) {
+                var val = e.target && e.target.value;
+                if (!map[val]) return;
+                box.classList.add("has-choice");
+                emojiEl.textContent = map[val].e;
+                textEl.textContent = map[val].t;
+                mood.classList.remove("show");
+                void mood.offsetWidth;
+                mood.classList.add("show");
+                if (val === "4" || val === "5") burst();
+            });
+        })();
+
+        /* ---------- Confete ---------- */
+        var burst = (function confetti() {
+            var canvas = document.getElementById("confetti");
+            if (!canvas || reduceMotion) return function () {};
+            var ctx = canvas.getContext("2d");
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+            var parts = [];
+            var colors = ["#ad1a05", "#f98224", "#ffd27a", "#ff6b4a", "#2ecc71"];
+            function fit() {
+                canvas.width = window.innerWidth * dpr;
+                canvas.height = window.innerHeight * dpr;
+                canvas.style.width = window.innerWidth + "px";
+                canvas.style.height = window.innerHeight + "px";
+            }
+            fit();
+            window.addEventListener("resize", fit);
+            var running = false;
+            function loop() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (var i = parts.length - 1; i >= 0; i--) {
+                    var p = parts[i];
+                    p.vy += 0.12 * dpr;
+                    p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+                    p.life--;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot);
+                    ctx.globalAlpha = Math.max(0, p.life / 60);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+                    ctx.restore();
+                    if (p.life <= 0 || p.y > canvas.height + 40) parts.splice(i, 1);
+                }
+                if (parts.length) requestAnimationFrame(loop);
+                else { running = false; ctx.clearRect(0, 0, canvas.width, canvas.height); }
+            }
+            return function (originX, originY) {
+                var cx = (originX != null ? originX : window.innerWidth / 2) * dpr;
+                var cy = (originY != null ? originY : window.innerHeight / 2.4) * dpr;
+                for (var i = 0; i < 90; i++) {
+                    var a = Math.random() * Math.PI * 2;
+                    var sp = (Math.random() * 6 + 3) * dpr;
+                    parts.push({
+                        x: cx, y: cy,
+                        vx: Math.cos(a) * sp,
+                        vy: Math.sin(a) * sp - 4 * dpr,
+                        s: (Math.random() * 8 + 5) * dpr,
+                        color: colors[(Math.random() * colors.length) | 0],
+                        rot: Math.random() * Math.PI,
+                        vr: (Math.random() - 0.5) * 0.3,
+                        life: Math.random() * 30 + 55
+                    });
+                }
+                if (!running) { running = true; requestAnimationFrame(loop); }
+            };
+        })();
+
+        /* ---------- Botão: ripple + estado de envio ---------- */
+        (function submitBtn() {
+            var btn = document.getElementById("submit-btn");
+            var form = document.querySelector("form");
+            if (!btn || !form) return;
+            btn.addEventListener("click", function (e) {
+                if (reduceMotion) return;
+                var rect = btn.getBoundingClientRect();
+                var r = document.createElement("span");
+                r.className = "ripple";
+                r.style.left = (e.clientX - rect.left) + "px";
+                r.style.top = (e.clientY - rect.top) + "px";
+                r.style.width = r.style.height = Math.max(rect.width, rect.height) / 12 + "px";
+                btn.appendChild(r);
+                setTimeout(function () { r.remove(); }, 650);
+            });
+            form.addEventListener("submit", function () {
+                // Deixa o formulário enviar normalmente; só mostra o feedback visual.
+                btn.classList.add("loading");
+            });
+        })();
+    })();
+    </script>
 </body>
 </html>
